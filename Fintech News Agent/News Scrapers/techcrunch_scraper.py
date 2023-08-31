@@ -24,7 +24,7 @@ def get_article_links_and_title(soup):
     link = soup.find_all('a', {'class':'post-block__title__link'})
     for item in link[2:]:
         links.append(item['href'])
-        titles.append(item.text)
+        titles.append(item.get_text().strip())
     return links, titles
 
 
@@ -45,10 +45,17 @@ def get_article_context(soup):
 
 
 def main():
+    article_contexts = []
     article_links, article_titles = get_article_links_and_title(soup)
-    article_date = get_article_authors_and_dates(soup)
+    article_authors, article_dates = get_article_authors_and_dates(soup)
     for link in article_links:
         page2 = requests.get(link)
         soup2 = BeautifulSoup(page2.content, "html.parser")
-        article_context = get_article_context(soup2)
+        article_contexts.append(get_article_context(soup2))
+    
+    descriptions =[{'Date': date, 'Author':author, 'Link':link, 'Context':context} for date, author, link, context in zip(article_authors, article_dates, article_links, article_contexts)]
+    techcrunch_articles = {title: d for title, d in zip(article_titles, descriptions)}
+    print(techcrunch_articles)
 
+if __name__ == '__main__':
+    main()
