@@ -16,6 +16,8 @@ base_url = 'https://www.techcrunch.com/'
 page = requests.get(base_url)
 soup = BeautifulSoup(page.content, "html.parser")
 
+
+
 def get_article_links_and_title(soup):
     "This function gets all the different links of the latest articles on TechCrunch."
     titles, links = [], []
@@ -26,36 +28,27 @@ def get_article_links_and_title(soup):
     return links, titles
 
 
-def get_article_author_and_time(soup):
-    "This function gets the author and time of a given article, when provided with soup object."
-    authors, times = [], []
-    time_tags = soup.find_all('time', class_ = 'full-date-time')
-    author_tag = soup.select_one('div.article__byline').find('a').get_text().strip()
-    print(time_tags)
-    for time in time_tags:
-        raw_datetime = time['datetime']
-        raw_datetime = datetime.strptime(raw_datetime, '%Y-%m-%dT%H:%M:%S%z').astimezone()
-        final_datetime = raw_datetime.strftime('%I:%M %p %Z %B %d, %Y')
-        times.append(final_datetime)
-    # for author in author_tag.find_all('a'):
-        # authors.append(author.get_text().strip())
-    return times, authors
+def get_article_authors_and_dates(soup):
+    """This function gets the article and dates of the latest published articles on TechCrunch."""
+    date_tags = soup.find_all('time')
+    dates = [pd.to_datetime(date_tag.get_text().strip()) for date_tag in date_tags]
+    author_tags = soup.find_all('span', class_='river-byline__authors')
+    authors = [author.get_text().strip() for author in author_tags]
+
+    return authors, dates
 
 
 def get_article_context(soup):
     "This function gets all the context from the given article."
     article_context = soup.select_one('div.article-content')
-    print("\n".join([x.get_text() for x in article_context.find_all('p')]))
-    print('-------------------------------')
+    return "\n".join([x.get_text() for x in article_context.find_all('p')])
 
 
+def main():
+    article_links, article_titles = get_article_links_and_title(soup)
+    article_date = get_article_authors_and_dates(soup)
+    for link in article_links:
+        page2 = requests.get(link)
+        soup2 = BeautifulSoup(page2.content, "html.parser")
+        article_context = get_article_context(soup2)
 
-
-article_links, article_titles = get_article_links_and_title(soup)
-
-
-for link in article_links:
-    page2 = requests.get(link)
-    soup2 = BeautifulSoup(page2.content, "html.parser")
-    times, authors = get_article_author_and_time(soup2)
-    get_article_context(soup2)
