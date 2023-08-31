@@ -2,7 +2,7 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timezone
-
+import json
 
 # class TechCrunchScraper():
 
@@ -31,7 +31,7 @@ def get_article_links_and_title(soup):
 def get_article_authors_and_dates(soup):
     """This function gets the article and dates of the latest published articles on TechCrunch."""
     date_tags = soup.find_all('time')
-    dates = [pd.to_datetime(date_tag.get_text().strip()) for date_tag in date_tags]
+    dates = [date_tag.get_text().strip() for date_tag in date_tags]
     author_tags = soup.find_all('span', class_='river-byline__authors')
     authors = [author.get_text().strip() for author in author_tags]
 
@@ -55,7 +55,14 @@ def main():
     
     descriptions =[{'Date': date, 'Author':author, 'Link':link, 'Context':context} for date, author, link, context in zip(article_authors, article_dates, article_links, article_contexts)]
     techcrunch_articles = {title: d for title, d in zip(article_titles, descriptions)}
+    json_object = json.dumps(techcrunch_articles, indent = 4) 
+
     print(techcrunch_articles)
+
+    # with open('TechCrunch_Dictionary', 'w') as f:
+    #     f.write(techcrunch_articles)
+
+    
 
 if __name__ == '__main__':
     main()
