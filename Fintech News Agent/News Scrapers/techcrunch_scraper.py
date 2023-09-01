@@ -34,10 +34,12 @@ class TechCrunchScraper():
         return authors, dates
 
 
-    def get_article_context(self, soup):
+    def get_article_content(self, soup):
         "This function gets all the context from the given article."
-        article_context = soup.select_one('div.article-content')
-        return "\n".join([x.get_text() for x in article_context.find_all('p', class_=False)])
+        article_content = soup.select_one('div.article-content')
+        contents = "\n".join([x.get_text() for x in article_content.find_all('p', class_=False)])
+        
+        return contents
 
 
     def get_article_type_and_category(self, soup):
@@ -67,24 +69,24 @@ class TechCrunchScraper():
         with open(techcrunch_text_file, 'w') as f:
             f.write(f"Total number of articles: {len(merged_dict)}")
             for key, dict_ in merged_dict.items():
-                f.write(f"\n\nDate: {dict_['Date']}\nAuthor: {dict_['Author']}\nCategory: {dict_['Category']}\nType: {dict_['Type']}\nLink: {dict_['Link']}\nTitle: {key}\nContext: {dict_['Context']}\n")
+                f.write(f"\n\nDate: {dict_['Date']}\nAuthor: {dict_['Author']}\nCategory: {dict_['Category']}\nType: {dict_['Type']}\nLink: {dict_['Link']}\nTitle: {key}\nContent: {dict_['Content']}\n")
         
 
 
     def main(self):
-        article_contexts, article_types, primary_categories = [], [], []
+        article_contents, article_types, primary_categories = [], [], []
         article_links, article_titles = self.get_article_links_and_title(self.soup)
         article_authors, article_dates = self.get_article_authors_and_dates(self.soup)
         for link in article_links:
             page2 = requests.get(link)
             soup2 = BeautifulSoup(page2.content, "html.parser")
-            article_contexts.append(self.get_article_context(soup2))
+            article_contents.append(self.get_article_content(soup2))
 
             article_type, primary_category = self.get_article_type_and_category(soup2)
             article_types.append(article_type)
             primary_categories.append(primary_category)
         
-        descriptions =[{'Date': date, 'Author':author, 'Category':category, 'Type':type_, 'Link':link, 'Context':context} for date, author, category, type_, link, context in zip(article_dates, article_authors, primary_categories, article_types, article_links, article_contexts)]
+        descriptions =[{'Date': date, 'Author':author, 'Category':category, 'Type':type_, 'Link':link, 'Content':content} for date, author, category, type_, link, content in zip(article_dates, article_authors, primary_categories, article_types, article_links, article_contents)]
         techcrunch_articles = {title: d for title, d in zip(article_titles, descriptions)}
 
         techcrunch_dict_file = '/Users/maxdebruijne/Documents/GitHub/langchain/Fintech News Agent/Data/TechCrunch_Dictionary.json'
