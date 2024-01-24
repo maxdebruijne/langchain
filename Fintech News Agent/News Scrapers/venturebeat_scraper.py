@@ -11,6 +11,7 @@ class VentureBeatScraper():
         self.base_url = 'https://www.venturebeat.com/'
         self.page = requests.get(self.base_url)
         self.soup = BeautifulSoup(self.page.content, "html.parser")
+        
 
 
     def get_article_link_and_title(self, soup):
@@ -41,6 +42,7 @@ class VentureBeatScraper():
         for link in links:
             page = requests.get(link)
             soup = BeautifulSoup(page.content, 'html.parser')
+            print(soup)
             content_tag = soup.find('div', class_ = 'article-content').findChildren('p', recursive=False)
             contents.append("\n".join([x.get_text() for x in content_tag]))
             authors.append(self.get_article_author(soup))
@@ -68,6 +70,7 @@ class VentureBeatScraper():
     def main(self):
 
         links, titles = self.get_article_link_and_title(self.soup)
+        print(titles)
         contents, authors, dates = self.get_article_content(links)
 
         descriptions =[{'Date': date, 'Author':author, 'Link':link, 'Content':content} for date, author, link, content in zip(dates, authors, links, contents)]

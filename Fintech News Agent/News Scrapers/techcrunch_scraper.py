@@ -66,9 +66,10 @@ class TechCrunchScraper():
         with open(techcrunch_dict_file, 'w') as f:
             json.dump(techcrunch_articles, f)
 
-        with open(techcrunch_text_file, 'w') as f:
+        with open(techcrunch_text_file, 'w', encoding="utf-8") as f:
             f.write(f"Total number of articles: {len(merged_dict)}")
             for key, dict_ in merged_dict.items():
+                print(key)
                 f.write(f"\n\nDate: {dict_['Date']}\nAuthor: {dict_['Author']}\nCategory: {dict_['Category']}\nType: {dict_['Type']}\nLink: {dict_['Link']}\nTitle: {key}\nContent: {dict_['Content']}\n")
         
 
